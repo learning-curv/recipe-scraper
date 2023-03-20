@@ -25,14 +25,6 @@ class Scraper(ABC):
     def url(self):
         return None
 
-    def process_recipes(self, *operators):
-        list(
-            map(
-                lambda recipe: _process_recipe(recipe, *operators),
-                zip(self.recipes, self.raw_recipes),
-            )
-        )
-
     @abstractmethod
     def get_recipes(self):
         pass
@@ -42,9 +34,29 @@ class Scraper(ABC):
         pass
 
     @abstractmethod
-    def get_descriptions(self, recipe):
+    def get_description(self, recipe):
         pass
 
     @abstractmethod
-    def get_authors(self):
+    def get_author(self, recipe):
         pass
+
+    @abstractmethod
+    def get_servings(self, recipe):
+        pass
+
+    @abstractmethod
+    def get_prep_time(self, recipe):
+        pass
+
+    @abstractmethod
+    def get_cook_time(self, recipe):
+        pass
+
+    def process_recipes(self, *operators):
+        list(
+            map(
+                lambda recipe: _process_recipe(recipe, *operators),
+                zip(self.recipes, self.raw_recipes),
+            )
+        )

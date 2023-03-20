@@ -32,10 +32,38 @@ class TheChunkyChefScraper(Scraper):
 
         return self
 
-    def get_descriptions(self, recipe):
+    def get_description(self, recipe):
         recipe_description = get_text(recipe.find("div", class_="wprm-recipe-summary"))
 
         return {"description": recipe_description}
 
-    def get_authors(self):
-        pass
+    def get_author(self, recipe):
+        recipe_author_container = recipe.find("span", class_="wprm-recipe-author")
+        recipe_author = get_text(
+            recipe_author_container.find("a", recursive=False)
+            if recipe_author_container
+            else None
+        )
+
+        return {"author": recipe_author}
+
+    def get_servings(self, recipe):
+        recipe_servings = get_text(recipe.find("span", class_="wprm-recipe-servings"))
+
+        return {"servings": recipe_servings}
+
+    def get_prep_time(self, recipe):
+        recipe_prep_time = get_text(recipe.find("span", class_="wprm-recipe-prep_time"))
+        recipe_prep_time_unit = get_text(
+            recipe.find("span", class_="wprm-recipe-prep_time-unit")
+        )
+
+        return {"prep_time": {"time": recipe_prep_time, "unit": recipe_prep_time_unit}}
+
+    def get_cook_time(self, recipe):
+        recipe_cook_time = get_text(recipe.find("span", class_="wprm-recipe-cook_time"))
+        recipe_cook_time_unit = get_text(
+            recipe.find("span", class_="wprm-recipe-cook_time-unit")
+        )
+
+        return {"cook_time": {"time": recipe_cook_time, "unit": recipe_cook_time_unit}}
