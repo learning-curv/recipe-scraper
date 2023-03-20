@@ -6,7 +6,7 @@ from the_chunky_chef_scraper import TheChunkyChefScraper
 
 class ScraperFactory(ABC):
     def create(self):
-      pass
+        pass
 
 
 class TheChunkyChefScraperFactory(ScraperFactory):
