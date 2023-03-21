@@ -1,25 +1,11 @@
 from __future__ import annotations
-from scraper_factory import TheChunkyChefScraperFactory
+from scraper_factory import createScraperFactory, FactoryType
 from abc import ABC, abstractmethod, abstractproperty
-
-
-class Animal(ABC):
-    @abstractmethod
-    def foo(self):
-        pass
-
-    def speak(self):
-        print("oink")
-
-
-class Pig(Animal):
-    def foo(self):
-        print("hello")
 
 
 if __name__ == "__main__":
     print("App: Launched")
-    factory = TheChunkyChefScraperFactory()
+    factory = createScraperFactory(FactoryType.THE_CHUNKY_CHEF)
     scraper = factory.create()
     scraper.get_recipes()
     scraper.process_recipes(
@@ -28,4 +14,8 @@ if __name__ == "__main__":
         scraper.get_servings,
         scraper.get_prep_time,
         scraper.get_cook_time,
+        scraper.get_ingredient_groups,
+        scraper.get_instruction_groups,
     )
+
+    scraper.show_recipes()

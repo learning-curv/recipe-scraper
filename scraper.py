@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod, abstractproperty
+import json
 
 
 def get_text(html):
@@ -12,7 +13,6 @@ def _process_recipe(recipe, *operators):
     for operator in operators:
         recipe_obj.update(operator(recipe_raw))
 
-    print(recipe_obj)
     return recipe_obj
 
 
@@ -53,6 +53,14 @@ class Scraper(ABC):
     def get_cook_time(self, recipe):
         pass
 
+    @abstractmethod
+    def get_ingredient_groups(self, recipe):
+        pass
+
+    @abstractmethod
+    def get_instruction_groups(self, recipe):
+        pass
+
     def process_recipes(self, *operators):
         list(
             map(
@@ -60,3 +68,6 @@ class Scraper(ABC):
                 zip(self.recipes, self.raw_recipes),
             )
         )
+
+    def show_recipes(self):
+        print(json.dumps(self.recipes, indent=2))
