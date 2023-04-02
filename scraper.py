@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod, abstractproperty
 import json
 
+from postgres_interface import save_recipes
+
 
 def get_text(html):
     return html.text if html else None
@@ -75,3 +77,6 @@ class Scraper(ABC):
 
     def show_recipes(self):
         print(json.dumps(self.recipes, indent=2))
+
+    def save_recipes(self):
+        save_recipes(self.recipes)

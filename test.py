@@ -20,6 +20,6 @@ if __name__ == "__main__":
         scraper.get_instruction_groups,
     )
 
+    scraper.save_recipes()
     end = time.perf_counter()
     print(f"{end - start:0.4f} seconds")
-    # scraper.show_recipes()
