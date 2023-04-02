@@ -4,6 +4,7 @@ from enum import Enum
 
 from scraper import Scraper
 from the_chunky_chef_scraper import TheChunkyChefScraper
+from bon_appetit_scraper import BonAppetitScraper
 
 
 def createScraperFactory(factoryType):
@@ -20,10 +21,17 @@ class TheChunkyChefScraperFactory(ScraperFactory):
         return TheChunkyChefScraper()
 
 
+class BonAppetitFactory(ScraperFactory):
+    def create(self) -> Scraper:
+        return BonAppetitScraper()
+
+
 class FactoryType(Enum):
-    THE_CHUNKY_CHEF = "the_chunky_chef"
+    THE_CHUNKY_CHEF = ("the_chunky_chef",)
+    BON_APPETIT = "bon_appetit"
 
 
 _scrapers = {
     FactoryType.THE_CHUNKY_CHEF: TheChunkyChefScraperFactory(),
+    FactoryType.BON_APPETIT: BonAppetitFactory(),
 }

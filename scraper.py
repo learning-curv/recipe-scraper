@@ -10,6 +10,10 @@ def get_text(html):
 def _process_recipe(recipe, *operators):
     recipe_obj, recipe_raw = recipe
 
+    if not recipe_raw:
+        print(recipe)
+        return None
+
     for operator in operators:
         recipe_obj.update(operator(recipe_raw))
 

@@ -1,4 +1,3 @@
-import json
 import requests
 from bs4 import BeautifulSoup
 from scraper import Scraper, get_text
@@ -12,7 +11,11 @@ def _get_recipe_page(recipe):
     recipe_soup = BeautifulSoup(recipe_page.content, "html.parser")
     recipe_results = recipe_soup.find("div", class_="wprm-recipe-the-chunky-chef")
 
-    return [{"title": get_text(title_element), "link": link["href"]}, recipe_results]
+    title_text = get_text(title_element)
+
+    print(title_text)
+
+    return [{"title": title_text, "link": link["href"]}, recipe_results]
 
 
 def find_ingredient_info(ingredient):
@@ -54,10 +57,24 @@ class TheChunkyChefScraper(Scraper):
         return "https://www.thechunkychef.com/recipe-index/"
 
     def get_recipes(self):
-        page = requests.get(self.url)
+        print("page: 1")
+        page = requests.get(self.url + "page/" + str(132))
         soup = BeautifulSoup(page.content, "html.parser")
         results = soup.find(id="genesis-content")
         recipe_blocks = results.find_all("article", class_="post")
+
+        next_button = results.find("li", class_="pagination-next")
+        pageIndex = 2
+
+        while next_button:
+            print("page: " + str(pageIndex))
+            page = requests.get(self.url + "page/" + str(pageIndex))
+            soup = BeautifulSoup(page.content, "html.parser")
+            results = soup.find(id="genesis-content")
+            recipe_blocks += results.find_all("article", class_="post")
+
+            next_button = results.find("li", class_="pagination-next")
+            pageIndex += 1
 
         zipped_list = list(map(_get_recipe_page, recipe_blocks))
 
