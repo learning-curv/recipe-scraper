@@ -3,15 +3,20 @@ import psycopg2.extras
 import json
 from uuid import uuid4
 
-conn = psycopg2.connect(
-    database="docker",
-    host="postgres",
-    user="docker",
-    password="docker",
-    port="5432",
-)
 
-cursor = conn.cursor()
+def connect():
+    conn = psycopg2.connect(
+        database="recipedb",
+        host="recipe-db",
+        user="postgres",
+        password="admin",
+        port="5432",
+    )
+
+    cursor = conn.cursor()
+
+    return conn, cursor
+
 
 # name_Table            = "news_stories"
 
@@ -35,9 +40,12 @@ cursor = conn.cursor()
 # for table in tables:
 #     print(table)
 
+
 def save_recipes(recipes):
+    conn, cursor = connect()
+
     data = list(map(lambda r: (str(uuid4()), json.dumps(r)), recipes))
-    insert_query = "insert into recipe_schema.recipes(id, recipe_data) values %s;"
+    insert_query = 'insert into "recipe-schema".recipes(id, recipe_data) values %s;'
     psycopg2.extras.execute_values(
         cursor, insert_query, data, template=None, page_size=100
     )
