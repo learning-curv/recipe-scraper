@@ -13,7 +13,7 @@ def _process_recipe(recipe, *operators):
     recipe_obj, recipe_raw = recipe
 
     if not recipe_raw:
-        print(recipe)
+        # print(recipe)
         return None
 
     for operator in operators:
@@ -45,6 +45,10 @@ class Scraper(ABC):
 
     @abstractmethod
     def get_author(self, recipe):
+        pass
+
+    @abstractmethod
+    def get_image_link(self, recipe):
         pass
 
     @abstractmethod

@@ -44,6 +44,9 @@ class BonAppetitScraper(Scraper):
     def get_author(self, recipe):
         pass
 
+    def get_image_link(self, recipe):
+        pass
+
     def get_servings(self, recipe):
         pass
 

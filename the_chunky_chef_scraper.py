@@ -89,13 +89,31 @@ class TheChunkyChefScraper(Scraper):
 
     def get_author(self, recipe):
         recipe_author_container = recipe.find("span", class_="wprm-recipe-author")
-        recipe_author = get_text(
-            recipe_author_container.find("a", recursive=False)
-            if recipe_author_container
-            else None
-        )
 
-        return {"author": recipe_author}
+        if not recipe_author_container:
+            return {"author": "The Chunky Chef"}
+
+        author_link = recipe_author_container.find("a", recursive=False)
+
+        if author_link:
+            # print({"author": get_text(author_link)})
+            return {"author": get_text(author_link)}
+
+        # print({"author": get_text(recipe_author_container)})
+        return {"author": get_text(recipe_author_container)}
+
+    def get_image_link(self, recipe):
+        recipe_image_container = recipe.find("div", "wprm-recipe-image")
+        recipe_image = recipe_image_container.find("img", recursive=False)
+        recipe_image_link = None
+
+        if recipe_image:
+            try:
+                recipe_image_link = recipe_image["data-src"]
+            except KeyError:
+                pass
+
+        return {"image-link": recipe_image_link}
 
     def get_servings(self, recipe):
         recipe_servings = get_text(recipe.find("span", class_="wprm-recipe-servings"))
@@ -103,20 +121,40 @@ class TheChunkyChefScraper(Scraper):
         return {"servings": recipe_servings}
 
     def get_prep_time(self, recipe):
-        recipe_prep_time = get_text(recipe.find("span", class_="wprm-recipe-prep_time"))
-        recipe_prep_time_unit = get_text(
-            recipe.find("span", class_="wprm-recipe-prep_time-unit")
+        recipe_prep_time_minutes = get_text(
+            recipe.find("span", class_="wprm-recipe-prep_time-minutes")
+        )
+        recipe_prep_time_hours = get_text(
+            recipe.find("span", class_="wprm-recipe-prep_time-hours")
         )
 
-        return {"prep_time": {"time": recipe_prep_time, "unit": recipe_prep_time_unit}}
+        time = 0
+
+        if recipe_prep_time_hours:
+            time += float(recipe_prep_time_hours) * 60
+
+        if recipe_prep_time_minutes:
+            time += float(recipe_prep_time_minutes)
+
+        return {"prep-time": time}
 
     def get_cook_time(self, recipe):
-        recipe_cook_time = get_text(recipe.find("span", class_="wprm-recipe-cook_time"))
-        recipe_cook_time_unit = get_text(
-            recipe.find("span", class_="wprm-recipe-cook_time-unit")
+        recipe_cook_time_minutes = get_text(
+            recipe.find("span", class_="wprm-recipe-cook_time-minutes")
+        )
+        recipe_cook_time_hours = get_text(
+            recipe.find("span", class_="wprm-recipe-cook_time-hours")
         )
 
-        return {"cook_time": {"time": recipe_cook_time, "unit": recipe_cook_time_unit}}
+        time = 0
+
+        if recipe_cook_time_hours:
+            time += float(recipe_cook_time_hours) * 60
+
+        if recipe_cook_time_minutes:
+            time += float(recipe_cook_time_minutes)
+
+        return {"cook-time": time}
 
     def get_ingredient_groups(self, recipe):
         ingredient_groups_raw = recipe.find_all(

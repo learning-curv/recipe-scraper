@@ -1,13 +1,15 @@
 import psycopg2
 import psycopg2.extras
 import json
-from uuid import uuid4
+from uuid import UUID, uuid5
+
+NAMESPACE = UUID("8b4f88c6-a5ea-4dac-8a59-7517c6e00981")
 
 
 def connect():
     conn = psycopg2.connect(
         database="recipedb",
-        host="recipe-db",
+        host="localhost",
         user="postgres",
         password="admin",
         port="5432",
@@ -44,8 +46,12 @@ def connect():
 def save_recipes(recipes):
     conn, cursor = connect()
 
-    data = list(map(lambda r: (str(uuid4()), json.dumps(r)), recipes))
-    insert_query = 'insert into "recipe-schema".recipes(id, recipe_data) values %s;'
+    filtered = [r for r in recipes if "author" in r.keys()]
+
+    data = list(
+        map(lambda r: (str(uuid5(NAMESPACE, r["title"])), json.dumps(r)), filtered)
+    )
+    insert_query = 'insert into "recipe-schema".recipes(id, recipe_data) values %s on conflict (id) do update set recipe_data = EXCLUDED.recipe_data'
     psycopg2.extras.execute_values(
         cursor, insert_query, data, template=None, page_size=100
     )

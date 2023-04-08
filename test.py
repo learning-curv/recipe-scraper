@@ -13,6 +13,7 @@ if __name__ == "__main__":
     scraper.process_recipes(
         scraper.get_description,
         scraper.get_author,
+        scraper.get_image_link,
         scraper.get_servings,
         scraper.get_prep_time,
         scraper.get_cook_time,
