@@ -58,7 +58,7 @@ class TheChunkyChefScraper(Scraper):
 
     def get_recipes(self):
         print("page: 1")
-        page = requests.get(self.url + "page/" + str(132))
+        page = requests.get(self.url + "page/" + str(1))
         soup = BeautifulSoup(page.content, "html.parser")
         results = soup.find(id="genesis-content")
         recipe_blocks = results.find_all("article", class_="post")
@@ -77,6 +77,8 @@ class TheChunkyChefScraper(Scraper):
             pageIndex += 1
 
         zipped_list = list(map(_get_recipe_page, recipe_blocks))
+
+        print(len(zipped_list))
 
         self.recipes, self.raw_recipes = zip(*zipped_list)
 
