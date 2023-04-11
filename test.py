@@ -1,27 +1,20 @@
 from __future__ import annotations
+import sys
 import time
-from scraper_factory import createScraperFactory, FactoryType
-from abc import ABC, abstractmethod, abstractproperty
-
+from scraper_factory import createScraperFactory, ScraperType
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("2 arguments required: (scraper_type, start_page_index)")
+        exit()
+
+    scraper_type = ScraperType(sys.argv[1])
+    start_page_index = int(sys.argv[2])
+
     print("App: Launched")
     start = time.perf_counter()
-    factory = createScraperFactory(FactoryType.BON_APPETIT)
+    factory = createScraperFactory(scraper_type)
     scraper = factory.create()
-    scraper.get_recipes()
-    scraper.process_recipes(
-        scraper.get_description,
-        scraper.get_author,
-        scraper.get_image_link,
-        scraper.get_servings,
-        # scraper.get_prep_time,
-        # scraper.get_cook_time,
-        # scraper.get_ingredient_groups,
-        # scraper.get_instruction_groups,
-    )
-
-    scraper.save_recipes()
-    # scraper.show_recipes()
+    scraper.scrape(start_page_index)
     end = time.perf_counter()
     print(f"{end - start:0.4f} seconds")

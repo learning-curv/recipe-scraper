@@ -46,10 +46,8 @@ def connect():
 def save_recipes(recipes):
     conn, cursor = connect()
 
-    filtered = [r for r in recipes if "author" in r.keys()]
-
     data = list(
-        map(lambda r: (str(uuid5(NAMESPACE, r["title"])), json.dumps(r)), filtered)
+        map(lambda r: (str(uuid5(NAMESPACE, r["link"])), json.dumps(r)), recipes)
     )
     insert_query = 'insert into "recipe-schema".recipes(id, recipe_data) values %s on conflict (id) do update set recipe_data = EXCLUDED.recipe_data'
     psycopg2.extras.execute_values(

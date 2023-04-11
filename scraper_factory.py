@@ -26,12 +26,12 @@ class BonAppetitFactory(ScraperFactory):
         return BonAppetitScraper()
 
 
-class FactoryType(Enum):
-    THE_CHUNKY_CHEF = ("the_chunky_chef",)
+class ScraperType(Enum):
+    THE_CHUNKY_CHEF = "the_chunky_chef"
     BON_APPETIT = "bon_appetit"
 
 
 _scrapers = {
-    FactoryType.THE_CHUNKY_CHEF: TheChunkyChefScraperFactory(),
-    FactoryType.BON_APPETIT: BonAppetitFactory(),
+    ScraperType.THE_CHUNKY_CHEF: TheChunkyChefScraperFactory(),
+    ScraperType.BON_APPETIT: BonAppetitFactory(),
 }

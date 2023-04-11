@@ -56,29 +56,24 @@ class TheChunkyChefScraper(Scraper):
     def url(self):
         return "https://www.thechunkychef.com/recipe-index/"
 
-    def get_recipes(self):
-        print("page: 1")
-        page = requests.get(self.url + "page/" + str(1))
+    def should_continue(self, page_index):
+        if page_index == 1:
+            return True
+
+        page = requests.get(self.url + "page/" + str(page_index - 1))
+        soup = BeautifulSoup(page.content, "html.parser")
+        results = soup.find(id="genesis-content")
+        next_button = results.find("li", class_="pagination-next")
+
+        return bool(next_button)
+
+    def get_recipes(self, page_index):
+        page = requests.get(self.url + "page/" + str(page_index))
         soup = BeautifulSoup(page.content, "html.parser")
         results = soup.find(id="genesis-content")
         recipe_blocks = results.find_all("article", class_="post")
 
-        next_button = results.find("li", class_="pagination-next")
-        pageIndex = 2
-
-        while next_button:
-            print("page: " + str(pageIndex))
-            page = requests.get(self.url + "page/" + str(pageIndex))
-            soup = BeautifulSoup(page.content, "html.parser")
-            results = soup.find(id="genesis-content")
-            recipe_blocks += results.find_all("article", class_="post")
-
-            next_button = results.find("li", class_="pagination-next")
-            pageIndex += 1
-
         zipped_list = list(map(_get_recipe_page, recipe_blocks))
-
-        print(len(zipped_list))
 
         self.recipes, self.raw_recipes = zip(*zipped_list)
 

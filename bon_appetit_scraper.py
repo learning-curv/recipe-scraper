@@ -3,6 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 from scraper import Scraper, get_text
 
+from uuid import UUID, uuid5
+
+NAMESPACE = UUID("8b4f88c6-a5ea-4dac-8a59-7517c6e00981")
+
 
 def _get_recipe_page(recipe):
     link = recipe.find("a", class_="summary-item__hed-link")
@@ -18,7 +22,7 @@ def _get_recipe_page(recipe):
 
     title_text = get_text(title_element)
 
-    print(title_text)
+    print(str(uuid5(NAMESPACE, link_text)) + " " + title_text + " " + link_text)
 
     return [
         {
@@ -30,13 +34,39 @@ def _get_recipe_page(recipe):
     ]
 
 
+def _map_recipe_ingredients(ingredient):
+    amount = get_text(ingredient[0])
+    name = get_text(ingredient[1])
+
+    if amount == "¼":
+        amount = 0.25
+    elif amount == "½":
+        amount = 0.5
+    elif amount == "¾":
+        amount = 0.75
+
+    name = name.replace("\u201d", "-inch")
+
+    return {"amount": amount, "name": name, "unit": None}
+
+
 class BonAppetitScraper(Scraper):
     @property
     def url(self):
         return "https://www.bonappetit.com/recipes"
 
-    def get_recipes(self):
-        page = requests.get(self.url + f"?page={1}")
+    def should_continue(self, page_index):
+        page = requests.get(self.url + f"?page={page_index}")
+        soup = BeautifulSoup(page.content, "html.parser")
+        results = soup.find_all("div", class_="summary-list__items")
+
+        if not results:
+            print("Couldn't load page")
+
+        return bool(results)
+
+    def get_recipes(self, page_index):
+        page = requests.get(self.url + f"?page={page_index}")
         soup = BeautifulSoup(page.content, "html.parser")
         results = soup.find_all("div", class_="summary-list__items")
 
@@ -45,26 +75,6 @@ class BonAppetitScraper(Scraper):
             for list_set in results
             for item in list_set.find_all("div", class_="summary-item--recipe")
         ]
-
-        pageIndex = 2
-
-        while results:
-            print("page: " + self.url + f"?page={pageIndex}")
-            page = requests.get(self.url + f"?page={pageIndex}")
-            soup = BeautifulSoup(page.content, "html.parser")
-            results = soup.find_all("div", class_="summary-list__items")
-
-            if not results:
-                print("break")
-                break
-
-            recipe_blocks += [
-                item
-                for list_set in results
-                for item in list_set.find_all("div", class_="summary-item--recipe")
-            ]
-
-            pageIndex += 1
 
         zipped_list = list(map(_get_recipe_page, recipe_blocks))
 
@@ -90,8 +100,12 @@ class BonAppetitScraper(Scraper):
         return {"image-link": image_container["src"]}
 
     def get_servings(self, recipe):
-        servings_container = recipe.find("div", attrs={"data-testid": "IngredientList"})
-        servings = servings_container.find("p")
+        ingredient_block = recipe.find("div", attrs={"data-testid": "IngredientList"})
+
+        if not ingredient_block:
+            return {"servings": None}
+
+        servings = ingredient_block.find("p")
 
         if not servings:
             return {"servings": None}
@@ -105,7 +119,27 @@ class BonAppetitScraper(Scraper):
         return {"cook-time": None}
 
     def get_ingredient_groups(self, recipe):
-        pass
+        ingredient_block = recipe.find("div", attrs={"data-testid": "IngredientList"})
+
+        ingredient_list = ingredient_block.find("div")
+
+        ingredient_amount_list = ingredient_list.find_all("p")
+        ingredient_name_list = ingredient_list.find_all("div")
+
+        zipped = zip(ingredient_amount_list, ingredient_name_list)
+
+        ingredients = list(map(_map_recipe_ingredients, zipped))
+
+        return {"ingredient_groups": [{"title": None, "ingredients": ingredients}]}
 
     def get_instruction_groups(self, recipe):
-        pass
+        instruction_block = recipe.find(
+            "div", attrs={"data-testid": "InstructionsWrapper"}
+        )
+        instruction_list = instruction_block.find("li")
+
+        instructions = instruction_list.find_all("p")
+
+        instructions = list(map(lambda i: get_text(i), instructions))
+
+        return {"instruction_groups": [{"title": None, "instructions": instructions}]}
