@@ -1,9 +1,10 @@
 import json
 import requests
 from bs4 import BeautifulSoup
-from scraper import Scraper, get_text
-
 from uuid import UUID, uuid5
+
+from scraper import Scraper, get_text
+from logging_config import logger
 
 NAMESPACE = UUID("8b4f88c6-a5ea-4dac-8a59-7517c6e00981")
 
@@ -22,7 +23,7 @@ def _get_recipe_page(recipe):
 
     title_text = get_text(title_element)
 
-    print(str(uuid5(NAMESPACE, link_text)) + " " + title_text + " " + link_text)
+    logger.info(str(uuid5(NAMESPACE, link_text)) + " " + title_text + " " + link_text)
 
     return [
         {
@@ -61,7 +62,7 @@ class BonAppetitScraper(Scraper):
         results = soup.find_all("div", class_="summary-list__items")
 
         if not results:
-            print("Couldn't load page")
+            logger.info("stop condition reached")
 
         return bool(results)
 

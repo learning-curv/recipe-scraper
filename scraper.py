@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod, abstractproperty
 import json
 
 from postgres_interface import save_recipes
+from logging_config import logger
 
 
 def get_text(html):
@@ -16,7 +17,10 @@ def _process_recipe(recipe, *operators):
         return None
 
     for operator in operators:
-        recipe_obj.update(operator(recipe_raw))
+        try:
+            recipe_obj.update(operator(recipe_raw))
+        except AttributeError:
+            logger.error({"operator": operator, "recipe": recipe_obj})
 
     return recipe_obj
 
@@ -86,7 +90,7 @@ class Scraper(ABC):
         page_index = start_index
 
         while self.should_continue(page_index):
-            print(f"scraping page: {page_index}")
+            logger.info(f"scraping page: {page_index}")
             self.get_recipes(page_index)
             self.process_recipes(
                 self.get_description,
@@ -99,9 +103,8 @@ class Scraper(ABC):
                 self.get_instruction_groups,
             )
 
-            print("persisting...")
+            logger.info("Writing to database")
             self.save_recipes()
-            print()
             page_index += 1
 
     def show_recipes(self):
